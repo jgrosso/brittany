@@ -29,7 +29,7 @@ before_cache:
 
 # The different configurations we want to test. We have
 # - BUILD=cabal which uses cabal-install(<2.0)
-# - BUILD=canew which uses cabal-install 2.0 "new-build"
+# - BUILD=canew which uses cabal-install 2.0 "v2-build"
 # - BUILD=stack which uses Stack.
 #
 # We set the compiler values here to tell Travis to use a different
@@ -50,18 +50,18 @@ matrix:
 
   ##### CABAL #####
   
-  - env: BUILD=cabal GHCVER=8.0.2 CABALVER=1.24 HAPPYVER=1.19.5 ALEXVER=3.1.7
+  - env: BUILD=cabal GHCVER=8.0.2 CABALVER=2.4 HAPPYVER=1.19.5 ALEXVER=3.1.7
     compiler: ": #cabal 8.0.2"
-    addons: {apt: {packages: [cabal-install-1.24,ghc-8.0.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
-  - env: BUILD=cabal GHCVER=8.2.2 CABALVER=1.24 HAPPYVER=1.19.5 ALEXVER=3.1.7
+    addons: {apt: {packages: [cabal-install-2.4,ghc-8.0.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+  - env: BUILD=cabal GHCVER=8.2.2 CABALVER=2.4 HAPPYVER=1.19.5 ALEXVER=3.1.7
     compiler: ": #cabal 8.2.2"
-    addons: {apt: {packages: [cabal-install-1.24,ghc-8.2.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
-  - env: BUILD=cabal GHCVER=8.4.4 CABALVER=1.24 HAPPYVER=1.19.5 ALEXVER=3.1.7
+    addons: {apt: {packages: [cabal-install-2.4,ghc-8.2.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+  - env: BUILD=cabal GHCVER=8.4.4 CABALVER=2.4 HAPPYVER=1.19.5 ALEXVER=3.1.7
     compiler: ": #cabal 8.4.4"
-    addons: {apt: {packages: [cabal-install-1.24,ghc-8.4.4,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
-  - env: BUILD=cabal GHCVER=8.6.5 CABALVER=1.24 HAPPYVER=1.19.5 ALEXVER=3.1.7
+    addons: {apt: {packages: [cabal-install-2.4,ghc-8.4.4,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+  - env: BUILD=cabal GHCVER=8.6.5 CABALVER=2.4 HAPPYVER=1.19.5 ALEXVER=3.1.7
     compiler: ": #cabal 8.6.5"
-    addons: {apt: {packages: [cabal-install-1.24,ghc-8.6.5,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.5,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
 
   # Build with the newest GHC and cabal-install. This is an accepted failure,
   # see below.
@@ -71,15 +71,15 @@ matrix:
 
   ##### CABAL DIST CHECK
 
-  - env: BUILD=cabaldist GHCVER=8.2.2 CABALVER=1.24 HAPPYVER=1.19.5 ALEXVER=3.1.7
+  - env: BUILD=cabaldist GHCVER=8.2.2 CABALVER=2.4 HAPPYVER=1.19.5 ALEXVER=3.1.7
     compiler: ": #cabal 8.2.2 dist"
-    addons: {apt: {packages: [cabal-install-1.24,ghc-8.2.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    addons: {apt: {packages: [cabal-install-2.4,ghc-8.2.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
 
   ##### CANEW #####
 
-  - env: BUILD=canew GHCVER=8.2.2 CABALVER=2.0 HAPPYVER=1.19.5 ALEXVER=3.1.7
-    compiler: ": #cabal new 8.2.2"
-    addons: {apt: {packages: [cabal-install-2.0,ghc-8.2.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+  - env: BUILD=canew GHCVER=8.6.5 CABALVER=3.0 HAPPYVER=1.19.5 ALEXVER=3.1.7
+    compiler: ": #cabal new 8.6.5"
+    addons: {apt: {packages: [cabal-install-3.0,ghc-8.6.5,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
   - env: BUILD=canew GHCVER=8.8.1 CABALVER=3.0 HAPPYVER=1.19.5 ALEXVER=3.1.7
     compiler: ": #cabal new 8.8.1"
     addons: {apt: {packages: [cabal-install-3.0,ghc-8.8.1,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
@@ -186,7 +186,7 @@ install:
       fi
       travis_retry cabal update -v
       sed -i 's/^jobs:/-- jobs:/' ${HOME}/.cabal/config
-      cabal install --only-dependencies --enable-tests --enable-benchmarks --dry -v > installplan.txt
+      cabal v1-install --only-dependencies --enable-tests --enable-benchmarks --dry -v > installplan.txt
       sed -i -e '1,/^Resolving /d' installplan.txt; cat installplan.txt
 
       # check whether current requested install-plan matches cached package-db snapshot
@@ -200,7 +200,7 @@ install:
         echo "cabal build-cache MISS";
         rm -rf $HOME/.cabsnap;
         mkdir -p $HOME/.ghc $HOME/.cabal/lib $HOME/.cabal/share $HOME/.cabal/bin;
-        cabal install -j$JOBS --only-dependencies --enable-tests --enable-benchmarks --ghc-options="-j1 +RTS -M700M -RTS";
+        cabal v1-install -j$JOBS --only-dependencies --enable-tests --enable-benchmarks --ghc-options="-j1 +RTS -M700M -RTS";
       fi
       
       # snapshot package-db on cache miss
@@ -220,8 +220,8 @@ install:
       echo '  ghc-options: -Werror -with-rtsopts=-N1 -j1 +RTS -M700M -RTS' >> cabal.project.local
       echo '  flags: +brittany-test-perf'                                  >> cabal.project.local
       rm -f cabal.project.freeze
-      cabal new-build -j$JOBS --enable-test --enable-benchmarks --dep
-      cabal new-build -j$JOBS --disable-tests --disable-benchmarks --dep
+      cabal v2-build -j$JOBS --enable-test --enable-benchmarks --dep
+      cabal v2-build -j$JOBS --disable-tests --disable-benchmarks --dep
       ;;
   esac
   set +ex
@@ -235,9 +235,9 @@ script:
       ;;
     cabal)
       if [ -f configure.ac ]; then autoreconf -i; fi
-      cabal configure --enable-tests --enable-benchmarks -v --flags="brittany-test-perf" # -v2 provides useful information for debugging
-      better_wait cabal build -j$JOBS --ghc-options="-j1 +RTS -M700M -RTS -Werror" # this builds all libraries and executables (including tests/benchmarks)
-      time cabal test --ghc-options="-with-rtsopts=-N1"
+      cabal v1-configure --enable-tests --enable-benchmarks -v --flags="brittany-test-perf" # -v2 provides useful information for debugging
+      better_wait cabal v1-build -j$JOBS --ghc-options="-j1 +RTS -M700M -RTS -Werror" # this builds all libraries and executables (including tests/benchmarks)
+      time cabal v1-test --ghc-options="-with-rtsopts=-N1"
       ;;
     cabaldist)
       # cabal check
@@ -250,9 +250,9 @@ script:
       (cd dist && better_wait cabal install -j$JOBS --force-reinstalls "$SRC_TGZ" --ghc-options="-j1 +RTS -M700M -RTS")
       ;;
     canew)
-      better_wait cabal new-build -j$JOBS --disable-tests --disable-benchmarks
-      better_wait cabal new-build -j$JOBS --enable-tests --enable-benchmarks
-      time cabal new-test -j1
+      better_wait cabal v2-build -j$JOBS --disable-tests --disable-benchmarks
+      better_wait cabal v2-build -j$JOBS --enable-tests --enable-benchmarks
+      time cabal v2-test -j1
       ;;
   esac
   set +ex
